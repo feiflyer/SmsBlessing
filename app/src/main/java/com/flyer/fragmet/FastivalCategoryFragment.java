@@ -53,8 +53,8 @@ public class FastivalCategoryFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity() , ChooseActivity.class);
-                intent.putExtra(ID_GESTIVAL_ID , mAdapter.getItem(position).getId());
+                Intent intent = new Intent(getActivity(), ChooseActivity.class);
+                intent.putExtra(ID_GESTIVAL_ID, mAdapter.getItem(position).getId());
                 startActivity(intent);
             }
         });

@@ -29,7 +29,7 @@ public class ChooseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFastivalId = getIntent().getIntExtra(FastivalCategoryFragment.ID_GESTIVAL_ID , -1);
+        mFastivalId = getIntent().getIntExtra(FastivalCategoryFragment.ID_GESTIVAL_ID, -1);
         setContentView(R.layout.activity_choose);
         setTitle(FastivalLab.getInstance().getFastivalById(mFastivalId).getName());
         layoutInflater = layoutInflater.from(this);
@@ -39,16 +39,16 @@ public class ChooseActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                SendMsgActivity.toActivity(ChooseActivity.this, mFastivalId, -1);
             }
         });
 
-        listView.setAdapter(mAdapter = new ArrayAdapter<Msg>(this , -1 , FastivalLab.getInstance().getMsgByFastivalId(mFastivalId)){
+        listView.setAdapter(mAdapter = new ArrayAdapter<Msg>(this, -1, FastivalLab.getInstance().getMsgByFastivalId(mFastivalId)) {
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(final int position, View convertView, ViewGroup parent) {
 
-                if (convertView == null){
-                    convertView = layoutInflater.inflate(R.layout.item_msg , parent , false);
+                if (convertView == null) {
+                    convertView = layoutInflater.inflate(R.layout.item_msg, parent, false);
                 }
 
                 TextView textView = (TextView) convertView.findViewById(R.id.tv_msg_content);
@@ -58,10 +58,9 @@ public class ChooseActivity extends AppCompatActivity {
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        SendMsgActivity.toActivity(ChooseActivity.this, mFastivalId, getItem(position).getId());
                     }
                 });
-
                 return convertView;
             }
         });

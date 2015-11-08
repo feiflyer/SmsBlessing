@@ -20,7 +20,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private TabLayout tab_layout;
     private ViewPager view_pager;
-    private String[] mTitles = new String[]{"节日短信" , "发送记录"};
+    private String[] mTitles = new String[]{"节日短信", "发送记录"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
         });
         tab_layout.setupWithViewPager(view_pager);
     }
-
-
 
 
 }
