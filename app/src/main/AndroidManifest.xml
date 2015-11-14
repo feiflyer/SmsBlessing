@@ -30,6 +30,10 @@
             android:label="@string/title_activity_choose"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".SendMsgActivity"></activity>
+        
+        <provider
+            android:authorities="com.flyer.sms.provider"
+            android:name="com.flyer.db.SmsProvider"/>
     </application>
 
 </manifest>

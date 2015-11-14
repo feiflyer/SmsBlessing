@@ -21,15 +21,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.flyer.bean.FastivalBean;
 import com.flyer.bean.FastivalLab;
 import com.flyer.bean.Msg;
+import com.flyer.bean.RecordBean;
 import com.flyer.tools.SmsTools;
 import com.flyer.view.FlowLayout;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class SendMsgActivity extends AppCompatActivity {
+public class SendMsgActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "send_msg";
     private static final String KEY_FASTIVAL_ID = "fastival_id";
@@ -39,7 +41,6 @@ public class SendMsgActivity extends AppCompatActivity {
     private static final String ACTION_SEND_MSG = "ACTION_SEND_MSG";
     private static final String ACTION_DELIVER_MSG = "ACTION_DELIVER_MSG";
 
-
     private PendingIntent sendPendingIntent;
 
     private PendingIntent resultPendingInent;
@@ -47,8 +48,12 @@ public class SendMsgActivity extends AppCompatActivity {
     //短信被成功接收的广播
     private BroadcastReceiver resultReceiver;
 
+    private FastivalBean mFastivalBean;
     private int mFastivalId;
     private int mMsgId;
+
+    private int sendMsgCount;
+    private int totalCount;
 
     /**
      * 定义两个容器，一个用来存放联系人显示昵称
@@ -69,23 +74,25 @@ public class SendMsgActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mFastivalId = getIntent().getIntExtra(KEY_FASTIVAL_ID, -1);
         mMsgId = getIntent().getIntExtra(KEY_MSG_ID, -1);
-        setContentView(R.layout.activity_send_msg);
 
+        initView();
+        initEvents();
+        initReceiver();
+    }
+
+    private void initView() {
+        setContentView(R.layout.activity_send_msg);
         et_content = (EditText) findViewById(R.id.et_content);
         btn_add = (Button) findViewById(R.id.btn_add);
         flow_layout = (FlowLayout) findViewById(R.id.flow_layout);
         fab_send = (FloatingActionButton) findViewById(R.id.fab_send);
         ll_layout_loading = (LinearLayout) findViewById(R.id.ll_layout_loading);
-
         if (mMsgId != -1) {
             Msg msg = FastivalLab.getInstance().getMsgById(mMsgId);
             et_content.setText(msg.getContent());
-            setTitle(FastivalLab.getInstance().getFastivalById(mFastivalId).getName());
+            mFastivalBean = FastivalLab.getInstance().getFastivalById(mFastivalId);
+            setTitle(mFastivalBean.getName());
         }
-
-        initEvents();
-
-        initReceiver();
     }
 
     private void initReceiver() {
@@ -103,6 +110,10 @@ public class SendMsgActivity extends AppCompatActivity {
                 } else {
                     Log.i(TAG, "短信发送失败");
                 }
+                sendMsgCount++;
+                if (sendMsgCount == totalCount) {
+                    finish();
+                }
 
             }
         }, new IntentFilter(ACTION_SEND_MSG));
@@ -118,8 +129,8 @@ public class SendMsgActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         try {
-            unregisterReceiver(sendReceiver);
-            unregisterReceiver(resultReceiver);
+            if (sendReceiver != null) unregisterReceiver(sendReceiver);
+            if (resultReceiver != null) unregisterReceiver(resultReceiver);
         } catch (Exception e) {
 
         }
@@ -127,32 +138,13 @@ public class SendMsgActivity extends AppCompatActivity {
     }
 
     private void initEvents() {
-        btn_add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //跳转到联系人界面，也可以自定义联系人选择界面
-                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                startActivity(intent);
-                startActivityForResult(intent, CODE_REQUEST);
-            }
-        });
-
-        fab_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mContactsNum.size() < 1) {
-                    Toast.makeText(SendMsgActivity.this , "请先选择联系人",Toast.LENGTH_LONG).show();
-                } else if (TextUtils.isEmpty(et_content.getText().toString())) {
-                    Toast.makeText(SendMsgActivity.this , "发送内容不能为空",Toast.LENGTH_LONG).show();
-                } else {
-                    new SmsTools().sendMsg(mContactsNum, et_content.getText().toString(), sendPendingIntent, resultPendingInent);
-                }
-            }
-        });
+        btn_add.setOnClickListener(this);
+        fab_send.setOnClickListener(this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CODE_REQUEST) {
             if (resultCode == RESULT_OK) {
                 //拿到联系人的uri
@@ -171,7 +163,6 @@ public class SendMsgActivity extends AppCompatActivity {
                 }
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -216,4 +207,57 @@ public class SendMsgActivity extends AppCompatActivity {
         intent.putExtra(KEY_MSG_ID, msgId);
         context.startActivity(intent);
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_add:
+                //跳转到联系人界面，也可以自定义联系人选择界面
+                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                startActivity(intent);
+                startActivityForResult(intent, CODE_REQUEST);
+                break;
+
+            case R.id.fab_send:
+
+                if (mContactsNum.size() < 1) {
+                    Toast.makeText(SendMsgActivity.this, "请先选择联系人", Toast.LENGTH_LONG).show();
+                } else if (TextUtils.isEmpty(et_content.getText().toString())) {
+                    Toast.makeText(SendMsgActivity.this, "发送内容不能为空", Toast.LENGTH_LONG).show();
+                } else {
+                    ll_layout_loading.setVisibility(View.VISIBLE);
+                    totalCount = new SmsTools(this).sendMsg(mContactsNum, buildRecordMsg(et_content.getText().toString()), sendPendingIntent, resultPendingInent);
+                    sendMsgCount = 0;
+                }
+
+                break;
+
+            default:
+
+                break;
+        }
+    }
+
+    private RecordBean buildRecordMsg(String s) {
+        RecordBean recordBean = new RecordBean();
+        recordBean.setMsgContent(s);
+        recordBean.setFastivalName(mFastivalBean.getName());
+        String names = "";
+        for (String name : mContactsName) {
+            names += name + ":";
+        }
+        //删除最后一个冒号
+        recordBean.setReceiverName(names.substring(0 , names.length() -1));
+
+        String nums = "";
+        for (String num : mContactsNum) {
+            nums += num + ":";
+        }
+
+        //删除最后一个冒号
+        recordBean.setMsgNum(nums.substring(0 , nums.length() -1));
+
+        return recordBean;
+    }
+
 }

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.flyer.fragmet.FastivalCategoryFragment;
+import com.flyer.fragmet.SmsHistoryFragment;
 
 import java.util.List;
 
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
         view_pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
+                if (position == 1){
+                    return new SmsHistoryFragment();
+                }
                 return new FastivalCategoryFragment();
             }
 
