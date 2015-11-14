@@ -46,6 +46,7 @@ public class SmsHistoryFragment extends ListFragment {
         mCursorAdapter = new CursorAdapter(getActivity(), null, false) {
             @Override
             public View newView(Context context, Cursor cursor, ViewGroup parent) {
+                //初始化布局
                 return mLayoutInflater.inflate(R.layout.item_sended_msg, parent, false);
             }
 
@@ -86,6 +87,16 @@ public class SmsHistoryFragment extends ListFragment {
     }
 
     private void initLoader() {
+        /**
+         * 如果有需要可以同过继承 AsyncTaskLoader实现自己的Loader
+         *
+         * 参考谷歌官方文档
+         * http://developer.android.com/reference/android/content/AsyncTaskLoader.html
+         *
+         * 如果标志loader的ID已经存在，则最后创建的loader被复用。
+         如果标志loader的ID不存在，initLoader()会激发LoaderManager.LoaderCallbacks的方法onCreateLoader()。
+
+         */
         getLoaderManager().initLoader(LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
