@@ -2,4 +2,5 @@
 慕课网学习节日短信祝福笔记
 
 视频链接地址：http://www.imooc.com/learn/510
-/n![icon](https://github.com/feiflyer/SmsBlessing/blob/master/app/src/main/res/mipmap-xxhdpi/ic_launcher.png)
+/r
+![icon](https://github.com/feiflyer/SmsBlessing/blob/master/app/src/main/res/mipmap-xxhdpi/ic_launcher.png)
